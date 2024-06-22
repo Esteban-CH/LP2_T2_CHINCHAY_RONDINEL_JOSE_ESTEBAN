@@ -43,4 +43,8 @@ public class EmpleadoController {
 		model.addAttribute("empleado", new EmpleadoEntity());
 		return("/empleados/registrar");
 	}
+	
+	public String mostrarVistaEditarEmpleado() {
+		return("/empleados/editar");
+	}
 }
