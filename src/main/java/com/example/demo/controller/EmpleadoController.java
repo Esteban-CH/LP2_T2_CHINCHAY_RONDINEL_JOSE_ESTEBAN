@@ -47,4 +47,8 @@ public class EmpleadoController {
 	public String mostrarVistaEditarEmpleado() {
 		return("/empleados/editar");
 	}
+	
+	public String detalleEmpleado() {
+		return("");
+	}
 }
