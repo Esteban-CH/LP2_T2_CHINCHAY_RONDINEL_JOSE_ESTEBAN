@@ -1,13 +1,19 @@
 package com.example.demo.controller;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import com.example.demo.entity.AreaEntity;
 import com.example.demo.entity.EmpleadoEntity;
@@ -22,6 +28,13 @@ public class EmpleadoController {
 	
 	@Autowired
 	private AreaRepository areaRepository;
+	
+	@InitBinder
+    public void initBinder(WebDataBinder binder) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        dateFormat.setLenient(false);
+        binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, true));
+    }
 	
 	@GetMapping("/listar_empleados")
 	public String listarEmpleados(Model model) {
@@ -44,11 +57,32 @@ public class EmpleadoController {
 		return("/empleados/registrar");
 	}
 	
-	public String mostrarVistaEditarEmpleado() {
+	@PostMapping("/registrar_empleado")
+	public String registarEmpleado(@ModelAttribute EmpleadoEntity empleado, Model model) {
+		empRepository.save(empleado);
+		return("redirect:/listar_empleados");
+	}
+	
+	@GetMapping("/editar_empleado/{id}")
+	public String mostrarVistaEditarEmpleado(@PathVariable("id")Integer id, Model model) {
+		EmpleadoEntity empleado = empRepository.findById(id).get();
+        List<AreaEntity> areas = areaRepository.findAll();
+        model.addAttribute("areas", areas);
+        model.addAttribute("empleado", empleado);
 		return("/empleados/editar");
 	}
 	
-	public String detalleEmpleado() {
-		return("");
-	}
+	@PostMapping("/editar_empleado/{id}")
+    public String editarEmpleado(@PathVariable("id") Integer id, @ModelAttribute EmpleadoEntity empleado, Model model) {
+        empleado.setDniEmpleado(id);
+        empRepository.save(empleado);
+        return ("redirect:/listar_empleados");
+    }
+	
+	@GetMapping("/detalle_empleado/{id}")
+    public String detalleEmpleado(@PathVariable("id") Integer id, Model model) {
+        EmpleadoEntity empleado = empRepository.findById(id).get();
+        model.addAttribute("empleado", empleado);
+        return "/empleados/detalle";
+    }
 }
